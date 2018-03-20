@@ -12,4 +12,26 @@ public class CornerDefender extends TeamRobot {
         }
         
         // hier methodes toevoegen
+        
+        /**
+     * @author William
+     */
+    public void goStartPosition() {
+        double dynamicWidth;
+        turnLeft(getHeading() - 180);
+
+        setAhead(getY() - 50);
+        while (getDistanceRemaining() > 0) {
+            execute();
+        }
+
+        turnRight(90);
+
+        dynamicWidth = (getBattleFieldWidth() * 0.20);
+
+        setAhead(getX() - getWidth() - dynamicWidth);
+        while (getDistanceRemaining() > 0) {
+            execute();
+        }
+    }
     }
