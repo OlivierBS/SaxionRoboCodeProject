@@ -1,6 +1,11 @@
 package nl.saxion;
 
 import robocode.TeamRobot;
+import robocode.HitWallEvent;
+import robocode.ScannedRobotEvent;
+import robocode.TeamRobot;
+
+import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class CornerDefender extends TeamRobot {
 // hier variabelen
