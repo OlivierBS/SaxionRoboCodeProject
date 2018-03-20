@@ -10,10 +10,11 @@ public class CornerDefender extends TeamRobot {
         while (true) {
         // hier algemene run methode
         }
+       }
         
         // hier methodes toevoegen
         
-        /**
+     /**
      * @author William
      */
     public void goStartPosition() {
@@ -33,5 +34,33 @@ public class CornerDefender extends TeamRobot {
         while (getDistanceRemaining() > 0) {
             execute();
         }
-    }
-    }
+        
+     /**
+     * @Author Olivier
+     */
+    private void goCornerLeft(){
+        if(getHeading()>270){
+            double turnDegrees = -270+getHeading();
+            turnLeft(turnDegrees);
+            //320 - x = 270
+            //- x = 270 - 320
+            //x = -270 + 320
+        }else if(getHeading()<270){
+            double turnDegrees = (270.0-getHeading());
+            turnRight(turnDegrees);
+            //220 + x = 270
+            //x = 270 - 220
+        }
+
+        ahead(getX()-DISTANCEFROMWALL);
+        turnLeft(90);
+
+        double percentage = getBattleFieldHeight()*PERCENTAGEBATTLEFIELD;
+        double distance = getY() - percentage;
+        // 300 + x = 680
+        // x = 680-300
+        ahead(distance);
+        
+     }
+    
+ }
