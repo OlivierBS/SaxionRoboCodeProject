@@ -1,0 +1,13 @@
+package nl.saxion;
+
+import robocode.TeamRobot;
+
+public class CornerDefender extends TeamRobot {
+
+    public void run(){
+        while (true) {
+        // hier algemene run methode
+        }
+        
+        // hier methodes toevoegen
+    }
