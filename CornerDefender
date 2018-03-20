@@ -25,14 +25,14 @@ public class CornerDefender extends TeamRobot {
         double dynamicWidth;
         turnLeft(getHeading() - 180);
 
-        setAhead(getY() - 50);
+        setAhead(getY() - DISTANCEFROMWALL);
         while (getDistanceRemaining() > 0) {
             execute();
         }
 
         turnRight(90);
 
-        dynamicWidth = (getBattleFieldWidth() * 0.20);
+        dynamicWidth = (getBattleFieldWidth() * PERCENTAGEBATTLEFIELD);
 
         setAhead(getX() - getWidth() - dynamicWidth);
         while (getDistanceRemaining() > 0) {
