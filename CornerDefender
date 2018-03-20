@@ -3,8 +3,10 @@ package nl.saxion;
 import robocode.TeamRobot;
 
 public class CornerDefender extends TeamRobot {
+// hier variabelen
 
     public void run(){
+    // hier startPosition()
         while (true) {
         // hier algemene run methode
         }
