@@ -4,6 +4,7 @@ import robocode.TeamRobot;
 
 public class CornerDefender extends TeamRobot {
 // hier variabelen
+    private int moveDirection = 1; // 1 = forward, -1 = backwards
 
     public void run(){
     // hier startPosition()
@@ -62,5 +63,63 @@ public class CornerDefender extends TeamRobot {
         ahead(distance);
         
      }
-    
+     
+    /**
+     * @author Yaolee
+     */
+    public void doStrafing() {
+        setTurnRight(Math.toDegrees(Math.atan(getBattleFieldHeight() / getBattleFieldWidth())));
+
+        // strafe by changing direction every 10 ticks
+        if (getTime() % 10 == 0) {
+            moveDirection *= -1;
+            setAhead(150 * moveDirection);
+        }
+    }
+
+    /**
+     * @author Yaolee
+     */
+    public void reverseDirection() {
+        if (moveDirection == 1) {
+            setBack(10000);
+        } else {
+            setAhead(10000);
+        }
+    }
+
+    /**
+     * @author Yaolee
+     */
+    public void onHitWall(HitWallEvent e) {
+        reverseDirection();
+    }
+
+    /**
+     * @author Yaolee
+     */
+    public void onScannedRobot(ScannedRobotEvent e){
+        // Calculate exact location of the robot
+        double absoluteBearing = getHeading() + e.getBearing();
+        double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+        double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
+
+        // If it's close enough, fire!
+        if (Math.abs(bearingFromGun) <= 3) {
+            setTurnGunRight(bearingFromGun);
+            setTurnRadarRight(bearingFromRadar); // keep the radar focused on the enemy
+
+            if (getGunHeat() == 0 && getEnergy() > .2) {
+                // never fires a bullet bigger than 3, just flooring the value to be safe
+                setFire(Math.min(400 / e.getDistance(), 3));
+            }
+        } else {
+            setTurnGunRight(bearingFromGun);
+            setTurnRadarRight(bearingFromRadar);
+        }
+
+        if (bearingFromGun == 0) {
+            scan();
+        }
+    }
  }
