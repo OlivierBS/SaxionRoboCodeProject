@@ -1,6 +1,5 @@
 package nl.saxion;
 
-import robocode.TeamRobot;
 import robocode.HitWallEvent;
 import robocode.ScannedRobotEvent;
 import robocode.TeamRobot;
@@ -8,25 +7,28 @@ import robocode.TeamRobot;
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class CornerDefender extends TeamRobot {
-// hier variabelen
     private int moveDirection = 1; // 1 = forward, -1 = backwards
-
     private static final double PERCENTAGEBATTLEFIELD = 0.20;
     private static final int DISTANCEFROMWALL = 50;
 
-    public void run(){
-    // hier startPosition()
+    public void run() {
+        // right CornerDefender
+        goCornerRight();
+        setTurnRight(45);
+        // left CornerDefender
+//        goCornerLeft();
+//        setTurnLeft(45);
         while (true) {
-        // hier algemene run methode
+            doStrafing();
+            setTurnRadarRight(360); // scan until you find your first enemy
+            execute();
         }
-       }
-        
-        // hier methodes toevoegen
-        
-     /**
+    }
+    
+    /**
      * @author William
      */
-    public void goStartPosition() {
+    public void goCornerRight() {
         double dynamicWidth;
         turnLeft(getHeading() - 180);
 
@@ -43,45 +45,41 @@ public class CornerDefender extends TeamRobot {
         while (getDistanceRemaining() > 0) {
             execute();
         }
-        
-     /**
+    }
+
+    /**
      * @Author Olivier
      */
-    private void goCornerLeft(){
-        if(getHeading()>270){
-            double turnDegrees = -270+getHeading();
+    private void goCornerLeft() {
+        if (getHeading() > 270) {
+            double turnDegrees = -270 + getHeading();
             turnLeft(turnDegrees);
-            //320 - x = 270
-            //- x = 270 - 320
-            //x = -270 + 320
-        }else if(getHeading()<270){
-            double turnDegrees = (270.0-getHeading());
+
+        } else if (getHeading() < 270) {
+            double turnDegrees = (270.0 - getHeading());
             turnRight(turnDegrees);
-            //220 + x = 270
-            //x = 270 - 220
+
         }
 
-        ahead(getX()-DISTANCEFROMWALL);
+        ahead(getX() - DISTANCEFROMWALL);
         turnLeft(90);
 
-        double percentage = getBattleFieldHeight()*PERCENTAGEBATTLEFIELD;
+        double percentage = getBattleFieldHeight() * PERCENTAGEBATTLEFIELD;
         double distance = getY() - percentage;
-        // 300 + x = 680
-        // x = 680-300
+
         ahead(distance);
-        
-     }
-     
+
+    }
+
     /**
      * @author Yaolee
      */
     public void doStrafing() {
-        setTurnRight(Math.toDegrees(Math.atan(getBattleFieldHeight() / getBattleFieldWidth())));
-
-        // strafe by changing direction every 10 ticks
-        if (getTime() % 10 == 0) {
+        // strafe by changing direction every 25 ticks
+        if (getTime() % 25 == 0) {
+            setMaxVelocity(3);
             moveDirection *= -1;
-            setAhead(150 * moveDirection);
+            setAhead(200 * moveDirection);
         }
     }
 
@@ -106,7 +104,7 @@ public class CornerDefender extends TeamRobot {
     /**
      * @author Yaolee
      */
-    public void onScannedRobot(ScannedRobotEvent e){
+    public void onScannedRobot(ScannedRobotEvent e) {
         // Calculate exact location of the robot
         double absoluteBearing = getHeading() + e.getBearing();
         double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
@@ -130,4 +128,4 @@ public class CornerDefender extends TeamRobot {
             scan();
         }
     }
- }
+}
