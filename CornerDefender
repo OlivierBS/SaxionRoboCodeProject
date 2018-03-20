@@ -12,6 +12,7 @@ public class CornerDefender extends TeamRobot {
     private static final int DISTANCEFROMWALL = 50;
 
     public void run() {
+        setDefenderColor();
         // right CornerDefender
         goCornerRight();
         setTurnRight(45);
@@ -127,5 +128,16 @@ public class CornerDefender extends TeamRobot {
         if (bearingFromGun == 0) {
             scan();
         }
+    }
+    
+    /**
+     * @author William
+     */
+    private void setDefenderColor() {
+        setBodyColor(new Color(0, 0, 0));
+        setGunColor(new Color(255, 0, 0));
+        setRadarColor(new Color(0, 0, 0));
+        setBulletColor(new Color(255, 0, 0));
+        setScanColor(new Color(0, 0, 0));
     }
 }
