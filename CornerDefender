@@ -20,6 +20,11 @@ public class CornerDefender extends TeamRobot {
 //        goCornerLeft();
 //        setTurnLeft(45);
         while (true) {
+        if (getTime() % 60 == 0) {
+                try {
+                    broadcastMessage("alive");
+                } catch (IOException ignored) { }
+            }
             doStrafing();
             setTurnRadarRight(360); // scan until you find your first enemy
             execute();
