@@ -1,6 +1,10 @@
-package nl.saxion.TeamBotsV2;
+package nl.saxion;
 
+import robocode.MessageEvent;
+import robocode.ScannedRobotEvent;
 import robocode.TeamRobot;
+import java.awt.*;
+import java.io.IOException;
 
 public class CornerCamper extends TeamRobot {
 
@@ -9,10 +13,25 @@ public class CornerCamper extends TeamRobot {
     private static final double LEFTARGETX = 25.0;
     private static final double LEFTTARGETY = 65.0;
 
+    private int id;
+
     public void run(){
 
-        goToRightCorner();
+        setDefenderColor();
+        getID();
+
+        if(id == 1){
+            goLeftCorner();
+        }else if(id == 2){
+            goToRightCorner();
+        }
     }
+
+    /*
+                               +--------------------------------+
+            +------------------+           Movement             +------------------+
+                               +--------------------------------+
+     */
 
     /**
      * @author Olivier
@@ -23,14 +42,20 @@ public class CornerCamper extends TeamRobot {
         double turnDegrees = -angle + getHeading();
 
         turnLeft(turnDegrees);
-        //System.out.println("ANGLE: " +angle + ". HEADING: " + getHeading() + ". turnDegrees: " + turnDegrees);
 
-        double distance = Math.hypot(getX()-RIGHTTARGETX,getY()-RIGHTTARGETY);
-        ahead(distance);
+        while(Math.ceil(getX()) != RIGHTTARGETX ){
+            double distance = Math.hypot(getX()-RIGHTTARGETX,getY()-RIGHTTARGETY);
+            ahead(distance);
+        }
 
         double turnGunDegrees = -45 + getGunHeading();
-
         turnLeft(turnGunDegrees);
+
+        try {
+            broadcastMessage(getName() +" READY");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -42,14 +67,40 @@ public class CornerCamper extends TeamRobot {
         double turnDegrees = -angle + getHeading();
 
         turnLeft(turnDegrees);
-        //System.out.println("ANGLE: " +angle + ". HEADING: " + getHeading() + ". turnDegrees: " + turnDegrees);
 
-        double distance = Math.hypot(getX()-LEFTARGETX,getY()-LEFTTARGETY);
-        ahead(distance);
+        while(Math.ceil(getX()) != LEFTARGETX ){
+            double distance = Math.hypot(getX()-LEFTARGETX,getY()-LEFTTARGETY);
+            ahead(distance);
+        }
 
         double turnGunDegrees = -45 + getGunHeading();
-
         turnLeft(turnGunDegrees);
+    }
+
+    /*
+                               +--------------------------------+
+            +------------------+          Utilities             +------------------+
+                               +--------------------------------+
+     */
+
+    /**
+     * @author Olivier
+     */
+    private void getID(){
+        String name = getName();
+        String requiredString = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
+        id = Integer.parseInt(requiredString);
+    }
+
+    /**
+     * @author William
+     */
+    private void setDefenderColor() {
+        setBodyColor(new Color(0, 0, 0));
+        setGunColor(new Color(255, 0, 0));
+        setRadarColor(new Color(0, 0, 0));
+        setBulletColor(new Color(255, 0, 0));
+        setScanColor(new Color(0, 0, 0));
     }
 
     /**
@@ -62,5 +113,32 @@ public class CornerCamper extends TeamRobot {
             angle += 360.0;
         }
         return angle;
+    }
+
+    /*
+                               +--------------------------------+
+            +------------------+             Events             +------------------+
+                               +--------------------------------+
+     */
+
+    @Override
+    public void onMessageReceived(MessageEvent event) {
+        if(event.getMessage() instanceof String){
+            System.out.println((String) event.getMessage());
+
+        }
+    }
+
+    @Override
+    public void onScannedRobot(ScannedRobotEvent event) {
+        super.onScannedRobot(event);
+
+        if(!isTeammate(event.getName())) {
+            try {
+                broadcastMessage("CD-OUT");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
