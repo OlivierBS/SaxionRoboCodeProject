@@ -1,32 +1,50 @@
 package nl.saxion;
 
 import robocode.HitWallEvent;
+import robocode.MessageEvent;
 import robocode.ScannedRobotEvent;
 import robocode.TeamRobot;
-
+import java.awt.*;
+import java.io.IOException;
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class CornerDefender extends TeamRobot {
-    private int moveDirection = 1; // 1 = forward, -1 = backwards
+
     private static final double PERCENTAGEBATTLEFIELD = 0.20;
     private static final int DISTANCEFROMWALL = 50;
 
+    private int moveDirection = 1; // 1 = forward, -1 = backwards
+    private int id;
+
     public void run() {
         setDefenderColor();
-        // right CornerDefender
-        goCornerRight();
         setTurnRight(45);
-        // left CornerDefender
-//        goCornerLeft();
+
 //        setTurnLeft(45);
+
+        getID();
+        if(id == 1){
+            // left CornerDefender
+            goCornerLeft();
+        }else if(id == 2){
+            // right CornerDefender
+            goCornerRight();
+        }
+
         while (true) {
-        sendAliveMessage();
-        doStrafing();
-        setTurnRadarRight(360); // scan until you find your first enemy
-        execute();
+            sendAliveMessage();
+            doStrafing();
+            setTurnRadarRight(360); // scan until you find your first enemy
+            execute();
         }
     }
-    
+
+    /*
+                               +--------------------------------+
+            +------------------+           Movement             +------------------+
+                               +--------------------------------+
+     */
+
     /**
      * @author William
      */
@@ -96,41 +114,21 @@ public class CornerDefender extends TeamRobot {
         }
     }
 
-    /**
-     * @author Yaolee
+    /*
+                               +--------------------------------+
+            +------------------+          Utilities             +------------------+
+                               +--------------------------------+
      */
-    public void onHitWall(HitWallEvent e) {
-        reverseDirection();
+
+    /**
+     * @author Olivier
+     */
+    private void getID(){
+        String name = getName();
+        String requiredString = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
+        id = Integer.parseInt(requiredString);
     }
 
-    /**
-     * @author Yaolee
-     */
-    public void onScannedRobot(ScannedRobotEvent e) {
-        // Calculate exact location of the robot
-        double absoluteBearing = getHeading() + e.getBearing();
-        double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
-        double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
-
-        // If it's close enough, fire!
-        if (Math.abs(bearingFromGun) <= 3) {
-            setTurnGunRight(bearingFromGun);
-            setTurnRadarRight(bearingFromRadar); // keep the radar focused on the enemy
-
-            if (getGunHeat() == 0 && getEnergy() > .2) {
-                // never fires a bullet bigger than 3, just flooring the value to be safe
-                setFire(Math.min(400 / e.getDistance(), 3));
-            }
-        } else {
-            setTurnGunRight(bearingFromGun);
-            setTurnRadarRight(bearingFromRadar);
-        }
-
-        if (bearingFromGun == 0) {
-            scan();
-        }
-    }
-    
     /**
      * @author William
      */
@@ -141,12 +139,71 @@ public class CornerDefender extends TeamRobot {
         setBulletColor(new Color(255, 0, 0));
         setScanColor(new Color(0, 0, 0));
     }
-    
-        public void sendAliveMessage() {
+
+    public void sendAliveMessage() {
         if (getTime() % 60 == 0) {
             try {
                 broadcastMessage("alive");
             } catch (IOException ignored) { }
         }
     }
+
+    /*
+                               +--------------------------------+
+            +------------------+             Events             +------------------+
+                               +--------------------------------+
+     */
+
+    @Override
+    public void onMessageReceived(MessageEvent event) {
+        super.onMessageReceived(event);
+        if(event.getMessage() instanceof String){
+            String message = (String) event.getMessage();
+
+            if(message.equals("CD-OUT")){
+                System.out.println("KAY");
+            }
+        }
+    }
+
+    /**
+     * @author Yaolee
+     */
+    @Override
+    public void onScannedRobot(ScannedRobotEvent e) {
+        // Calculate exact location of the robot
+        double absoluteBearing = getHeading() + e.getBearing();
+        double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+        double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
+
+        if(!isTeammate(e.getName())) {
+            // If it's close enough, fire!
+            if (Math.abs(bearingFromGun) <= 3) {
+                setTurnGunRight(bearingFromGun);
+                setTurnRadarRight(bearingFromRadar); // keep the radar focused on the enemy
+
+                if (getGunHeat() == 0 && getEnergy() > .2) {
+                    // never fires a bullet bigger than 3, just flooring the value to be safe
+                    setFire(Math.min(400 / e.getDistance(), 3));
+                }
+            } else {
+                setTurnGunRight(bearingFromGun);
+                setTurnRadarRight(bearingFromRadar);
+            }
+
+            if (bearingFromGun == 0) {
+                scan();
+            }
+        }
+    }
+
+    /**
+     * @author Yaolee
+     */
+    @Override
+    public void onHitWall(HitWallEvent e) {
+        reverseDirection();
+    }
 }
+
+
