@@ -14,6 +14,7 @@ public class CornerCamper extends TeamRobot {
     private static final double LEFTTARGETY = 65.0;
 
     private int id;
+    private int readyInt = 0;
 
     public void run(){
 
@@ -95,8 +96,12 @@ public class CornerCamper extends TeamRobot {
      */
     private void getID(){
         String name = getName();
-        String requiredString = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
-        id = Integer.parseInt(requiredString);
+        if(!name.contains("(")){
+            id = 1;
+        }else{
+            String requiredString = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
+            id = Integer.parseInt(requiredString);
+        }
     }
 
     /**
@@ -131,7 +136,7 @@ public class CornerCamper extends TeamRobot {
     @Override
     public void onMessageReceived(MessageEvent event) {
         if(event.getMessage() instanceof String){
-            System.out.println((String) event.getMessage());
+         String message = (String) event.getMessage();
 
         }
     }
@@ -145,6 +150,38 @@ public class CornerCamper extends TeamRobot {
                 broadcastMessage("CD-OUT");
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+    
+       @Override
+    public void onRobotDeath(RobotDeathEvent event) {
+        super.onRobotDeath(event);
+        if (isTeammate(event.getName())) {
+            String requiredString = event.getName().substring(event.getName().indexOf("(") + 1, event.getName().indexOf(")"));
+
+            int idS = Integer.parseInt(requiredString);
+
+            if (idS == 1) {
+                System.out.println("Corner Defender " + idS + " is dead!");
+            } else if (idS == 2) {
+                System.out.println("Corner Defender " + idS + " is dead!");
+            }
+
+        }
+    }
+    
+        @Override
+    public void onHitRobot(HitRobotEvent event) {
+        super.onHitRobot(event);
+
+        if(isTeammate(event.getName())){
+            clearAllEvents();
+            ahead(-10);
+            if(id == 1){
+                goLeftCorner();
+            }else if(id == 2){
+                goToRightCorner();
             }
         }
     }
