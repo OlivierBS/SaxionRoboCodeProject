@@ -154,27 +154,25 @@ public class CornerCamper extends TeamRobot {
         }
     }
     
-       @Override
+    @Override
     public void onRobotDeath(RobotDeathEvent event) {
         super.onRobotDeath(event);
+        
         if (isTeammate(event.getName())) {
             String requiredString = event.getName().substring(event.getName().indexOf("(") + 1, event.getName().indexOf(")"));
-
             int idS = Integer.parseInt(requiredString);
-
             if (idS == 1) {
                 System.out.println("Corner Defender " + idS + " is dead!");
             } else if (idS == 2) {
                 System.out.println("Corner Defender " + idS + " is dead!");
             }
-
         }
     }
     
-        @Override
+    @Override
     public void onHitRobot(HitRobotEvent event) {
         super.onHitRobot(event);
-
+        
         if(isTeammate(event.getName())){
             clearAllEvents();
             ahead(-10);
