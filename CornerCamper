@@ -25,6 +25,12 @@ public class CornerCamper extends TeamRobot {
         }else if(id == 2){
             goToRightCorner();
         }
+        
+        while (true) {
+            if (getGunHeat() == 0 && getEnergy() > .2) {
+            // never fires a bullet bigger than 3, just flooring the value to be safe
+            setFire(Math.min(400 / e.getDistance(), 3));
+            }
     }
 
     /*
