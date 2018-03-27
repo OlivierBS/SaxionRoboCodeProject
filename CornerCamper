@@ -12,6 +12,8 @@ public class CornerCamper extends TeamRobot {
     private static final double RIGHTTARGETY = 25.0;
     private static final double LEFTARGETX = 25.0;
     private static final double LEFTTARGETY = 65.0;
+    
+    private static final String READY_MESSAGE = "READY";
 
     private int id;
     private int readyInt = 0;
@@ -60,7 +62,7 @@ public class CornerCamper extends TeamRobot {
         turnLeft(turnGunDegrees);
 
         try {
-            broadcastMessage(getName() +" READY");
+            broadcastMessage(READY_MESSAGE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,6 +85,12 @@ public class CornerCamper extends TeamRobot {
 
         double turnGunDegrees = -45 + getGunHeading();
         turnLeft(turnGunDegrees);
+        
+        try {
+            broadcastMessage(READY_MESSAGE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /*
