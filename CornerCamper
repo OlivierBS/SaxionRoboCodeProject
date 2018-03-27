@@ -16,7 +16,6 @@ public class CornerCamper extends TeamRobot {
     private static final String READY_MESSAGE = "READY";
 
     private int id;
-    private int readyInt = 0;
 
     public void run(){
 
