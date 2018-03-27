@@ -18,17 +18,16 @@ public class CornerDefender extends TeamRobot {
 
     public void run() {
         setDefenderColor();
-        setTurnRight(45);
-
-//        setTurnLeft(45);
 
         getID();
         if(id == 1){
             // left CornerDefender
             goCornerLeft();
+            setTurnLeft(45);
         }else if(id == 2){
             // right CornerDefender
             goCornerRight();
+            setTurnRight(45);
         }
 
         while (true) {
