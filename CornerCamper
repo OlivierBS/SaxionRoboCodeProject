@@ -31,6 +31,7 @@ public class CornerCamper extends TeamRobot {
             // never fires a bullet bigger than 3, just flooring the value to be safe
             setFire(Math.min(400 / e.getDistance(), 3));
             }
+        }
     }
 
     /*
