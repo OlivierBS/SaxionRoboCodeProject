@@ -15,6 +15,7 @@ public class CornerDefender extends TeamRobot {
 
     private int moveDirection = 1; // 1 = forward, -1 = backwards
     private int id;
+    private int readyInt = 0;
 
     public void run() {
         setDefenderColor();
@@ -123,9 +124,13 @@ public class CornerDefender extends TeamRobot {
      * @author Olivier
      */
     private void getID(){
-        String name = getName();
-        String requiredString = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
-        id = Integer.parseInt(requiredString);
+         String name = getName();
+        if(!name.contains("(")){
+            id = 1;
+        }else{
+            String requiredString = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
+            id = Integer.parseInt(requiredString);
+        }
     }
 
     /**
@@ -159,7 +164,18 @@ public class CornerDefender extends TeamRobot {
         if(event.getMessage() instanceof String){
             String message = (String) event.getMessage();
 
-            if(message.equals("CD-OUT")){
+            if(message.equals("READY")){
+                readyInt++;
+
+                if(readyInt == 2){
+                    if(id == 1){
+                       // goCornerLeft();
+                    }else if(id == 2){
+                       // goCornerRight();
+                    }
+                }
+
+            }else if(message.equals("CD-OUT")){
                 System.out.println("KAY");
             }
         }
@@ -202,6 +218,21 @@ public class CornerDefender extends TeamRobot {
     @Override
     public void onHitWall(HitWallEvent e) {
         reverseDirection();
+    }
+    
+    @Override
+    public void onHitRobot(HitRobotEvent event) {
+        super.onHitRobot(event);
+
+        if(isTeammate(event.getName())){
+            clearAllEvents();
+            ahead(-40);
+            if(id == 1){
+                getReadyLeft();
+            }else if(id == 2){
+                getReadyRight();
+            }
+        }
     }
 }
 
