@@ -1,4 +1,4 @@
-package nl.saxion.TeamBotsV2;
+package nl.saxion;
 
 import robocode.*;
 import java.awt.*;
