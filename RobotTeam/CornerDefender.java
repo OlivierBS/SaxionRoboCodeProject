@@ -99,9 +99,11 @@ public class CornerDefender extends TeamRobot {
     public void onHitRobot(HitRobotEvent event) {
         super.onHitRobot(event);
 
-        if(isTeammate(event.getName())){
-            clearAllEvents();
-            ahead(-40);
+       if(isTeammate(event.getName())){
+            if(event.isMyFault()) {
+                clearAllEvents();
+                ahead(-20);
+            }
         }
     }
 }
