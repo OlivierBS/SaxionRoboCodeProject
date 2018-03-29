@@ -1,0 +1,245 @@
+package nl.saxion;
+
+import robocode.*;
+
+import java.awt.*;
+import java.io.IOException;
+
+import static robocode.util.Utils.normalRelativeAngleDegrees;
+
+public class CornerCamper extends TeamRobot {
+
+    private static final double RIGHTTARGETX = 65.0;
+    private static final double RIGHTTARGETY = 25.0;
+    private static final double LEFTARGETX = 25.0;
+    private static final double LEFTTARGETY = 65.0;
+
+    private int id;
+    private int deathCount = 0;
+    private boolean isCamper = true; // robot begint als camper
+    private boolean isShark;
+    private boolean movingForward = true;
+    boolean inWall;
+
+    public void run() {
+        setDefenderColor();
+        getID();
+
+        if (id == 1) {
+            goLeftCorner();
+        } else if (id == 2) {
+            goToRightCorner();
+        }
+
+        while (isCamper) {
+            if (getGunHeat() == 0 && getEnergy() > .2) {
+                setFire(1);
+            }
+            execute();
+        }
+
+        while (isShark) {
+            if (getX() > 50 && getY() > 50 && getBattleFieldWidth() - getX() > 50 && getBattleFieldHeight() - getY() > 50 && inWall == true) {
+                inWall = false;
+            }
+            if (getX() <= 50 || getY() <= 50 || getBattleFieldWidth() - getX() <= 50 || getBattleFieldHeight() - getY() <= 50) {
+                if (inWall == false) {
+                    reverseDirection();
+                    inWall = true;
+                }
+            }
+
+            if (getRadarTurnRemaining() == 0.0) {
+                setTurnRadarRight(360);
+            }
+
+            execute();
+        }
+    }
+
+    /*
+                               +--------------------------------+
+            +------------------+           Movement             +------------------+
+                               +--------------------------------+
+     */
+
+    /**
+     * @author Olivier
+     */
+    private void goToRightCorner() {
+
+        double angle = getAngle(RIGHTTARGETX, RIGHTTARGETY);
+        double turnDegrees = -angle + getHeading();
+
+        turnLeft(turnDegrees);
+
+        while (Math.ceil(getX()) != RIGHTTARGETX) {
+            double distance = Math.hypot(getX() - RIGHTTARGETX, getY() - RIGHTTARGETY);
+            ahead(distance);
+        }
+
+        double turnGunDegrees = -45 + getGunHeading();
+        turnLeft(turnGunDegrees);
+
+        try {
+            broadcastMessage(getName() + " READY");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * @author Olivier
+     */
+    private void goLeftCorner() {
+
+        double angle = getAngle(LEFTARGETX, LEFTTARGETY);
+        double turnDegrees = -angle + getHeading();
+
+        turnLeft(turnDegrees);
+
+        while (Math.ceil(getX()) != LEFTARGETX) {
+            double distance = Math.hypot(getX() - LEFTARGETX, getY() - LEFTTARGETY);
+            ahead(distance);
+        }
+
+        double turnGunDegrees = -45 + getGunHeading();
+        turnLeft(turnGunDegrees);
+    }
+
+    public void reverseDirection() {
+        if (movingForward) {
+            setBack(10000);
+            movingForward = false;
+        } else {
+            setAhead(10000);
+            movingForward = true;
+        }
+    }
+
+    /*
+                               +--------------------------------+
+            +------------------+          Utilities             +------------------+
+                               +--------------------------------+
+     */
+
+    /**
+     * @author Olivier
+     */
+    private void getID() {
+        String name = getName();
+        String requiredString = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
+        id = Integer.parseInt(requiredString);
+    }
+
+    /**
+     * @author William
+     */
+    private void setDefenderColor() {
+        setBodyColor(new Color(0, 0, 0));
+        setGunColor(new Color(0, 0, 255));
+        setRadarColor(new Color(0, 0, 0));
+        setBulletColor(new Color(0, 0, 255));
+        setScanColor(new Color(255, 255, 255));
+    }
+
+    /**
+     * @author Olivier
+     */
+    private double getAngle(double targetX, double targetY) {
+        double angle = Math.toDegrees(Math.atan2(targetX - getX(), targetY - getY()));
+
+        if (angle < 0) {
+            angle += 360.0;
+        }
+        return angle;
+    }
+
+
+    /*
+                               +--------------------------------+
+            +------------------+             Events             +------------------+
+                               +--------------------------------+
+     */
+
+    /**
+     * @author Yaolee
+     */
+    @Override
+    public void onScannedRobot(ScannedRobotEvent e) {
+        if (isShark) {
+            if (!isTeammate(e.getName())) {
+                // Calculate exact location of the robot
+                double absoluteBearing = getHeading() + e.getBearing();
+                double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+                double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
+
+                // 80 and 100 degrees will make us move closer every turn
+                if (movingForward) {
+                    setTurnRight(normalRelativeAngleDegrees(e.getBearing() + 80));
+                } else {
+                    setTurnRight(normalRelativeAngleDegrees(e.getBearing() + 100));
+                }
+
+                // If it's close enough, fire!
+                if (Math.abs(bearingFromGun) <= 3) {
+                    setTurnGunRight(bearingFromGun);
+                    setTurnRadarRight(bearingFromRadar); // keep the radar focused on the enemy
+
+                    if (getGunHeat() == 0 && getEnergy() > .2) {
+                        setFire(Math.min(400 / e.getDistance(), 3));
+                    }
+
+                } else {
+                    setTurnGunRight(bearingFromGun);
+                    setTurnRadarRight(bearingFromRadar);
+                }
+
+                if (bearingFromGun == 0) {
+                    scan();
+                }
+            }
+        }
+    }
+
+    /**
+     * @author Olivier
+     */
+    @Override
+    public void onRobotDeath(RobotDeathEvent event) {
+        super.onRobotDeath(event);
+        if (isTeammate(event.getName())) {
+            String requiredString = event.getName().substring(event.getName().indexOf("(") + 1, event.getName().indexOf(")"));
+
+            int idS = Integer.parseInt(requiredString);
+
+            if (idS == 1) {
+                System.out.println("Corner Defender " + idS + " is dead!");
+                isCamper = false;
+                isShark = true;
+            } else if (idS == 2) {
+                System.out.println("Corner Defender " + idS + " is dead!");
+                isCamper = false;
+                isShark = true;
+            }
+        }
+    }
+
+    /**
+     * @author Yaolee
+     */
+    public void onHitWall(HitWallEvent e) {
+        reverseDirection();
+    }
+
+    /**
+     * @author Yaolee
+     */
+    public void onHitRobot(HitRobotEvent e) {
+        if (isShark) {
+            if (e.isMyFault()) {
+                reverseDirection();
+            }
+        }
+    }
+}
