@@ -60,4 +60,40 @@ public class StrafeBot extends TeamRobot {
             String message = (String) event.getMessage();
         }
     }
+    
+     public void onHitByBullet(HitByBulletEvent event){
+        System.out.println(event.getName() + " hit me!");
+
+        // calculate exact location of enemy
+        double absoluteBearing = getHeading() + event.getBearing();
+        double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+        double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
+
+        setTurnGunRight(bearingFromGun);
+        setTurnRadarRight(bearingFromRadar);
+    }
+
+    public void onScannedRobot(ScannedRobotEvent e) {
+        double absoluteBearing = getHeading() + e.getBearing();
+        double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+        double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
+
+        if (Math.abs(bearingFromGun) <= 3) {
+            setTurnGunRight(bearingFromGun);
+            setTurnRadarRight(bearingFromRadar); // keep the radar focused on the enemy
+
+            if (getGunHeat() == 0 && getEnergy() > .2) {
+                // never fires a bullet bigger than 3, just flooring the value to be safe
+                // fires at least a bullet of 2
+                setFire(Math.min((400 / e.getDistance()) + 2 , 3));
+            }
+        } else {
+            setTurnGunRight(bearingFromGun);
+            setTurnRadarRight(bearingFromRadar);
+        }
+
+        if (bearingFromGun == 0) {
+            scan();
+        }
+    }
 }
