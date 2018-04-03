@@ -6,7 +6,6 @@ import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class TeamSharkbot extends TeamRobot {
     boolean movingForward;
-    boolean inWall;
 
     public void run() {
         setAhead(10000);
