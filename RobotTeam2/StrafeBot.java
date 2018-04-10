@@ -90,4 +90,14 @@ public class StrafeBot extends TeamRobot {
         }
     }
 
+    /**
+     * Reverses direction if it's the fault of the robot.
+     * @author Yao Lee
+     * @param event HitRobotEvent event.
+     */
+    public void onHitRobot(HitRobotEvent event) {
+        if(event.isMyFault()){
+            movement.reverseStrafeDirection();
+        }
+    }
 }
