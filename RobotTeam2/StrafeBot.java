@@ -32,8 +32,9 @@ public class StrafeBot extends TeamRobot {
 
     /**
      * Lets the robot shoot at a target.
-     * @author Yao Lee, William
+     *
      * @param event ScannedRobotEvent event.
+     * @author Yao Lee, William
      */
     private void firingMechanicStrafer(ScannedRobotEvent event) {
         double absoluteBearing = getHeading() + event.getBearing();
@@ -66,8 +67,9 @@ public class StrafeBot extends TeamRobot {
 
     /**
      * onHitByBullet targets enemy robot that hit the robot.
-     * @author Yao Lee
+     *
      * @param event HitByBulletEvent event.
+     * @author Yao Lee
      */
     public void onHitByBullet(HitByBulletEvent event) {
         // calculate exact location of enemy
@@ -81,8 +83,9 @@ public class StrafeBot extends TeamRobot {
 
     /**
      * onScannedRobot assigns new target or targets target.
-     * @author Mike, Olivier, William
+     *
      * @param event ScannedRobotEvent event.
+     * @author Mike, Olivier, William
      */
     public void onScannedRobot(ScannedRobotEvent event) {
         if (!isTeammate(event.getName())) {
@@ -92,11 +95,12 @@ public class StrafeBot extends TeamRobot {
 
     /**
      * Reverses direction if it's the fault of the robot.
-     * @author Yao Lee
+     *
      * @param event HitRobotEvent event.
+     * @author Yao Lee
      */
     public void onHitRobot(HitRobotEvent event) {
-        if(event.isMyFault()){
+        if (event.isMyFault()) {
             movement.reverseStrafeDirection();
         }
     }
