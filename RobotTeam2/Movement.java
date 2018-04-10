@@ -1,4 +1,4 @@
-package nl.saxion;
+package nl.saxion.Sprint2Team;
 
 import robocode.TeamRobot;
 
@@ -11,7 +11,6 @@ public class Movement {
 
     private TeamRobot robot;
     private Utilities utilities;
-    private Messaging messaging;
 
     private double battleFieldHeight;
     private double battleFieldWidth;
@@ -21,10 +20,9 @@ public class Movement {
     private int id;
     private int moveDirection = 1; // 1 = forward, -1 = backwards
 
-    public Movement(TeamRobot robot, Utilities utilities, Messaging messaging){
+    public Movement(TeamRobot robot, Utilities utilities){
         this.robot = robot;
         this.utilities = utilities;
-        this.messaging = messaging;
         id = utilities.getID();
 
         battleFieldHeight = robot.getBattleFieldHeight();
@@ -35,6 +33,9 @@ public class Movement {
         startingYPos2 = battleFieldHeight * 0.60;
     }
 
+    /**
+     * @author Olivier
+     */
     public void goToPos() {
         if(id == 1){
             goToPoint(startingXPos1,startingYPos1);
@@ -96,18 +97,21 @@ public class Movement {
         }
     }
 
+    /**
+     * @author Olivier
+     */
     private void turnToDegree(double degree){
-            if (robot.getHeading() < 180 && robot.getHeading() >= 0) {
-                robot.setTurnRight((degree - robot.getHeading()));
-                while(robot.getTurnRemaining() > 0){
-                    robot.execute();
-                }
-            } else if (robot.getHeading() >= 180 && robot.getHeading() <= 360) {
-                robot.setTurnLeft((-degree + robot.getHeading()));
-                while(robot.getTurnRemaining() > 0){
-                    robot.execute();
-                }
+        if (robot.getHeading() < 180 && robot.getHeading() >= 0) {
+            robot.setTurnRight((degree - robot.getHeading()));
+            while(robot.getTurnRemaining() > 0){
+                robot.execute();
             }
+        } else if (robot.getHeading() >= 180 && robot.getHeading() <= 360) {
+            robot.setTurnLeft((-degree + robot.getHeading()));
+            while(robot.getTurnRemaining() > 0){
+                robot.execute();
+            }
+        }
         robot.waitFor(utilities.hasDegree(degree));
     }
 
