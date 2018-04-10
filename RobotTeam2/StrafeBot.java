@@ -2,21 +2,17 @@ package nl.saxion;
 
 import robocode.*;
 import java.awt.*;
-import java.io.IOException;
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
 public class StrafeBot extends TeamRobot {
 
     private static final Color BODY_COLOR = new Color(143, 161, 255);
     private static final Color GUN_COLOR = new Color(14, 0, 57);
-    private static final Color RADAR_COLOR = new Color(205, 255, 199);
-    private static final Color BULLET_COLOR = new Color(58, 2, 7);
+    private static final Color RADAR_COLOR = new Color(143, 161, 255);
+    private static final Color BULLET_COLOR = new Color(86, 182, 56);
     private static final Color SCAN_COLOR = new Color(237, 239, 255);
 
     private Movement movement;
-
-    private String currentTarget = null;
-    private boolean targetAssigned = false;
 
     /**
      * Standard run method, which gets called when robot spawns.
@@ -28,8 +24,8 @@ public class StrafeBot extends TeamRobot {
         movement.strafeBotGoToPos();
 
         while (true) {
-            movement.strafeBotStrafing();
             setTurnRadarRight(360); // scan until you find your first enemy
+            movement.strafeBotStrafing();
             execute();
         }
     }
@@ -39,7 +35,7 @@ public class StrafeBot extends TeamRobot {
      * @author Yao Lee, William
      * @param event ScannedRobotEvent event.
      */
-    public void firingMechanicStrafer(ScannedRobotEvent event) {
+    private void firingMechanicStrafer(ScannedRobotEvent event) {
         double absoluteBearing = getHeading() + event.getBearing();
         double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
         double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
@@ -69,23 +65,6 @@ public class StrafeBot extends TeamRobot {
      */
 
     /**
-     * onMessageReceived checks if the robot receives target and assigns it to the variable.
-     * @author Mike, William, Olivier
-     * @param event MessageEvent event.
-     */
-    @Override
-    public void onMessageReceived(MessageEvent event) {
-        if (event.getMessage() instanceof String) {
-            String message = event.getMessage().toString();
-            if (message.contains("TARGET:")) {
-                targetAssigned = true;
-                currentTarget = message.substring(6);
-            }
-
-        }
-    }
-
-    /**
      * onHitByBullet targets enemy robot that hit the robot.
      * @author Yao Lee
      * @param event HitByBulletEvent event.
@@ -107,36 +86,8 @@ public class StrafeBot extends TeamRobot {
      */
     public void onScannedRobot(ScannedRobotEvent event) {
         if (!isTeammate(event.getName())) {
-            if (!targetAssigned) {
-                try {
-                    broadcastMessage("TARGET:" + event.getName());
-                    currentTarget = event.getName();
-                    targetAssigned = true;
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                }
-            }
-            if (targetAssigned) {
-                if (event.getName().equals(currentTarget)) {
-                    firingMechanicStrafer(event);
-                } else {
-                    scan();
-                }
-            } else {
-                firingMechanicStrafer(event);
-            }
+            firingMechanicStrafer(event);
         }
     }
 
-    /**
-     * onRobotDeath which checks if the target died.
-     * @author Mike, William
-     * @param event RobotDeathEvent event.
-     */
-    @Override
-    public void onRobotDeath(RobotDeathEvent event) {
-        if (currentTarget.equals(event.getName())) {
-            targetAssigned = false;
-        }
-    }
 }
