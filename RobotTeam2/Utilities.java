@@ -1,4 +1,4 @@
-package nl.saxion;
+package nl.saxion.Sprint2Team;
 
 import robocode.Condition;
 import robocode.TeamRobot;
@@ -6,10 +6,16 @@ import java.awt.*;
 
 public class Utilities {
 
+    private TeamRobot robot;
+
+    public Utilities(TeamRobot robot){
+        this.robot = robot;
+    }
+
     /**
      * @author Olivier
      */
-    public static final int getID(TeamRobot robot) {
+    public int getID() {
         String name = robot.getName();
         if (!name.contains("(")) {
             return 1;
@@ -22,7 +28,7 @@ public class Utilities {
     /**
      * @author Olivier
      */
-    public static final int getID(String name) {
+    public int getID(String name) {
         if (!name.contains("(")) {
             return 1;
         } else {
@@ -32,9 +38,20 @@ public class Utilities {
     }
 
     /**
+     * @author William
+     */
+    public void setDefenderColor(Color robotBodyColor, Color robotGunColor, Color robotRadarColor, Color robotBulletColor, Color robotScanColor) {
+        robot.setBodyColor(robotBodyColor);
+        robot.setGunColor(robotGunColor);
+        robot.setRadarColor(robotRadarColor);
+        robot.setBulletColor(robotBulletColor);
+        robot.setScanColor(robotScanColor);
+    }
+
+    /**
      * @author Olivier
      */
-    public static final double getAngle(TeamRobot robot, double targetX, double targetY) {
+    public double getAngle(double targetX, double targetY) {
         double angle = Math.toDegrees(Math.atan2(targetX - robot.getX(), targetY - robot.getY()));
 
         if (angle < 0) {
@@ -42,11 +59,10 @@ public class Utilities {
         }
         return angle;
     }
-
     /**
      * @author Olivier
      */
-    public static final double getDistanceToPoint(TeamRobot robot, double targetX, double targetY){
+    public double getDistanceToPoint(double targetX, double targetY){
         double distance = Math.hypot(robot.getX()-targetX,robot.getY()-targetY);
         return distance;
     }
@@ -54,9 +70,9 @@ public class Utilities {
     /**
      * @author Olivier
      */
-    public static final Point getClosestPoint(TeamRobot robot, double targetX1, double targetY1, double targetX2, double targetY2){
-        int distanceFromTarget1 = (int) getDistanceToPoint(robot, targetX1, targetY1);
-        int distanceFromTarget2 = (int) getDistanceToPoint(robot, targetX2, targetY2);
+    public Point getClosestPoint(double targetX1, double targetY1, double targetX2, double targetY2){
+        int distanceFromTarget1 = (int) getDistanceToPoint(targetX1, targetY1);
+        int distanceFromTarget2 = (int) getDistanceToPoint(targetX2, targetY2);
 
         Point p = null;
 
@@ -71,7 +87,7 @@ public class Utilities {
     /**
      * @author Olivier
      */
-     public static final Condition hasDegree(TeamRobot robot, double degree){
+    public Condition hasDegree(double degree){
         Condition condition = new Condition() {
             @Override
             public boolean test() {
@@ -85,4 +101,3 @@ public class Utilities {
         return condition;
     }
 }
-
