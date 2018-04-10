@@ -12,19 +12,19 @@ public class SharkBot extends TeamRobot {
     private static final Color RADAR_COLOR = new Color(60, 60, 60);
     private static final Color BULLET_COLOR = new Color(140, 255, 66);
     private static final Color SCAN_COLOR = new Color(216, 255, 243);
+    private static final int DISTANCE = 100;
 
     private Movement movement;
 
     private boolean inWall;
     private boolean inTeammate = true;
     private double locationX = 0, locationY = 0;
-    private int distance = 100;
 
     /**
      * Standard run method, which gets called when robot spawns.
      */
     public void run() {
-        Utilities.setRobotColor(this,BODY_COLOR, GUN_COLOR, RADAR_COLOR, BULLET_COLOR, SCAN_COLOR);
+        Utilities.setRobotColor(this, BODY_COLOR, GUN_COLOR, RADAR_COLOR, BULLET_COLOR, SCAN_COLOR);
 
         movement = new Movement(this);
 
@@ -61,13 +61,14 @@ public class SharkBot extends TeamRobot {
 
     /**
      * Checks if other teammates are nearby and reverses if so.
+     *
      * @author Mike
      */
     private void nearTeammateCheck() {
-        if ((getX() - locationX > distance || getX() - locationX < -distance || getY() - locationY > distance || getY() - locationY < -distance) && !inTeammate) {
+        if ((getX() - locationX > DISTANCE || getX() - locationX < -DISTANCE || getY() - locationY > DISTANCE || getY() - locationY < -DISTANCE) && !inTeammate) {
             inTeammate = true;
         }
-        if (getX() - locationX < distance && getX() - locationX > -distance && getY() - locationY < distance && getY() - locationY > -distance && inTeammate) {
+        if (getX() - locationX < DISTANCE && getX() - locationX > -DISTANCE && getY() - locationY < DISTANCE && getY() - locationY > -DISTANCE && inTeammate) {
 
             inTeammate = false;
             movement.reverseSharkDirection();
@@ -76,6 +77,7 @@ public class SharkBot extends TeamRobot {
 
     /**
      * Checks if walls are nearby and reverses if so
+     *
      * @author Mike
      */
     private void nearWallCheck() {
@@ -92,8 +94,9 @@ public class SharkBot extends TeamRobot {
 
     /**
      * Lets the robot shoot at a target.
-     * @author Yao Lee, William
+     *
      * @param event ScannedRobotEvent event.
+     * @author Yao Lee, William
      */
     private void firingMechanicShark(ScannedRobotEvent event) {
         double absoluteBearing = getHeading() + event.getBearing();
@@ -132,10 +135,10 @@ public class SharkBot extends TeamRobot {
 
     /**
      * Handles the targeting system with messaging.
-     * @author Mike, Olivier, William
+     *
      * @param event MessageEvent event.
+     * @author Mike, Olivier, William
      */
-    @Override
     public void onMessageReceived(MessageEvent event) {
         if (event.getMessage() instanceof String) {
             String message = (String) event.getMessage();
@@ -149,8 +152,9 @@ public class SharkBot extends TeamRobot {
 
     /**
      * Reverses direction if the robot hits a wall.
-     * @author Yao Lee
+     *
      * @param event HitWallEvent event.
+     * @author Yao Lee
      */
     public void onHitWall(HitWallEvent event) {
         movement.reverseSharkDirection();
@@ -158,8 +162,9 @@ public class SharkBot extends TeamRobot {
 
     /**
      * Starts shooting if the scanned robot isn't a teammate.
-     * @author Mike, Olivier, William
+     *
      * @param event ScannedRobotEvent event.
+     * @author Mike, Olivier, William
      */
     public void onScannedRobot(ScannedRobotEvent event) {
         if (!isTeammate(event.getName())) {
@@ -169,8 +174,9 @@ public class SharkBot extends TeamRobot {
 
     /**
      * Reverses direction if it's the fault of the robot.
-     * @author Yao Lee
+     *
      * @param event HitRobotEvent event.
+     * @author Yao Lee
      */
     public void onHitRobot(HitRobotEvent event) {
         if (event.isMyFault()) {
