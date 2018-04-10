@@ -33,6 +33,9 @@ public class Movement {
         startingYPos2 = battleFieldHeight * 0.60;
     }
 
+    /**
+     * @author Olivier
+     */
     public void goToPos() {
         if(id == 1){
             goToPoint(startingXPos1,startingYPos1);
@@ -94,6 +97,9 @@ public class Movement {
         }
     }
 
+    /**
+     * @author Olivier
+     */
     private void turnToDegree(double degree){
         if (robot.getHeading() < 180 && robot.getHeading() >= 0) {
             robot.setTurnRight((degree - robot.getHeading()));
