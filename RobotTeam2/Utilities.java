@@ -1,4 +1,4 @@
-package nl.saxion.Sprint2Team;
+package nl.saxion;
 
 import robocode.Condition;
 import robocode.TeamRobot;
@@ -6,16 +6,13 @@ import java.awt.*;
 
 public class Utilities {
 
-    private TeamRobot robot;
-
-    public Utilities(TeamRobot robot){
-        this.robot = robot;
-    }
-
     /**
+     * Returns the id of a robot.
      * @author Olivier
+     * @param robot robot instance to get the name.
+     * @return Integer with the id of the robot.
      */
-    public int getID() {
+    public static int getID(TeamRobot robot) {
         String name = robot.getName();
         if (!name.contains("(")) {
             return 1;
@@ -26,9 +23,12 @@ public class Utilities {
     }
 
     /**
+     * Returns the id of a robot with the robot's name.
      * @author Olivier
+     * @param name the robot's name.
+     * @return Integer with the id of the robot.
      */
-    public int getID(String name) {
+    public static int getID(String name) {
         if (!name.contains("(")) {
             return 1;
         } else {
@@ -38,20 +38,14 @@ public class Utilities {
     }
 
     /**
-     * @author William
-     */
-    public void setDefenderColor(Color robotBodyColor, Color robotGunColor, Color robotRadarColor, Color robotBulletColor, Color robotScanColor) {
-        robot.setBodyColor(robotBodyColor);
-        robot.setGunColor(robotGunColor);
-        robot.setRadarColor(robotRadarColor);
-        robot.setBulletColor(robotBulletColor);
-        robot.setScanColor(robotScanColor);
-    }
-
-    /**
+     * Returns the angle to a certain point.
      * @author Olivier
+     * @param robot robot instance to get the degree.
+     * @param targetX the X target of the point.
+     * @param targetY the Y target of the point.
+     * @return Double with the angle to a certain point.
      */
-    public double getAngle(double targetX, double targetY) {
+    public static double getAngle(TeamRobot robot, double targetX, double targetY) {
         double angle = Math.toDegrees(Math.atan2(targetX - robot.getX(), targetY - robot.getY()));
 
         if (angle < 0) {
@@ -59,20 +53,32 @@ public class Utilities {
         }
         return angle;
     }
+
     /**
+     * Returns the distance to a point.
      * @author Olivier
+     * @param robot robot instance to get the distance.
+     * @param targetX the X target of the point.
+     * @param targetY the Y target of the point.
+     * @return Double with the distance to the point.
      */
-    public double getDistanceToPoint(double targetX, double targetY){
-        double distance = Math.hypot(robot.getX()-targetX,robot.getY()-targetY);
-        return distance;
+    public static double getDistanceToPoint(TeamRobot robot, double targetX, double targetY){
+        return Math.hypot(robot.getX()-targetX,robot.getY()-targetY);
     }
 
     /**
+     * Returns the closest point of two points.
      * @author Olivier
+     * @param robot robot instance to get the distance.
+     * @param targetX1 the X target of point 1.
+     * @param targetY1 the Y target of point 1.
+     * @param targetX2 the X target of point 2.
+     * @param targetY2 the Y target of point 2.
+     * @return Point with the closest x,y.
      */
-    public Point getClosestPoint(double targetX1, double targetY1, double targetX2, double targetY2){
-        int distanceFromTarget1 = (int) getDistanceToPoint(targetX1, targetY1);
-        int distanceFromTarget2 = (int) getDistanceToPoint(targetX2, targetY2);
+    public static Point getClosestPoint(TeamRobot robot, double targetX1, double targetY1, double targetX2, double targetY2){
+        int distanceFromTarget1 = (int) getDistanceToPoint(robot, targetX1, targetY1);
+        int distanceFromTarget2 = (int) getDistanceToPoint(robot, targetX2, targetY2);
 
         Point p = null;
 
@@ -85,9 +91,13 @@ public class Utilities {
     }
 
     /**
+     * Returns the condition for a certain degree.
      * @author Olivier
+     * @param robot robot instance to get heading of.
+     * @param degree degree that is to be checked.
+     * @return Condition with the degree that was given.
      */
-    public Condition hasDegree(double degree){
+     public static Condition hasDegree(TeamRobot robot, double degree){
         Condition condition = new Condition() {
             @Override
             public boolean test() {
@@ -99,5 +109,23 @@ public class Utilities {
             }
         };
         return condition;
+    }
+
+    /**
+     * Sets the color of a robot.
+     * @author William
+     * @param robot robot instance to set the colors to.
+     * @param robotBodyColor robot's body color.
+     * @param robotGunColor robot's gun color.
+     * @param robotRadarColor robot's rader color.
+     * @param robotBulletColor robot's bullet color.
+     * @param robotScanColor robot's scan color.
+     */
+    public static void setRobotColor(TeamRobot robot, Color robotBodyColor, Color robotGunColor, Color robotRadarColor, Color robotBulletColor, Color robotScanColor) {
+        robot.setBodyColor(robotBodyColor);
+        robot.setGunColor(robotGunColor);
+        robot.setRadarColor(robotRadarColor);
+        robot.setBulletColor(robotBulletColor);
+        robot.setScanColor(robotScanColor);
     }
 }
