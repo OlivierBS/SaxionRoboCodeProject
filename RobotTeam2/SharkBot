@@ -1,13 +1,11 @@
-package nl.saxion.Sprint2Team;
+package nl.saxion;
 
 import robocode.*;
-
 import java.awt.*;
 import java.io.IOException;
-
 import static robocode.util.Utils.normalRelativeAngleDegrees;
 
-public class TeamSharkbot extends TeamRobot {
+public class SharkBot extends TeamRobot {
 
     private static final Color BODY_COLOR = new Color(255, 68, 67);
     private static final Color GUN_COLOR = new Color(245, 125, 134);
@@ -15,32 +13,31 @@ public class TeamSharkbot extends TeamRobot {
     private static final Color BULLET_COLOR = new Color(140, 255, 66);
     private static final Color SCAN_COLOR = new Color(216, 255, 243);
 
-    private Utilities utilities;
+    private Movement movement;
 
-    private String currentTarget = null;
-    private boolean movingForward;
-    private boolean targetAssigned = false;
-    boolean inWall;
-    boolean inTeammate = true;
-    double locationX = 0;
-    double locationY = 0;
-    int distance = 100;
-    
+    private boolean inWall;
+    private boolean inTeammate = true;
+    private double locationX = 0, locationY = 0;
+    private int distance = 100;
 
+    /**
+     * Standard run method, which gets called when robot spawns.
+     */
     public void run() {
-        utilities = new Utilities(this);
-         if (getX() <= 50 || getY() <= 50 || getBattleFieldWidth() - getX() <= 50 || getBattleFieldHeight() - getY() <= 50) {
+        Utilities.setRobotColor(this,BODY_COLOR, GUN_COLOR, RADAR_COLOR, BULLET_COLOR, SCAN_COLOR);
+
+        movement = new Movement(this);
+
+        if (getX() <= 50 || getY() <= 50 || getBattleFieldWidth() - getX() <= 50 || getBattleFieldHeight() - getY() <= 50) {
             inWall = true;
         } else {
             inWall = false;
         }
         setAhead(10000);
         setTurnRadarRight(360); // Scan until you find your first enemy
-        movingForward = true;
-        utilities.setDefenderColor(BODY_COLOR, GUN_COLOR, RADAR_COLOR, BULLET_COLOR, SCAN_COLOR);
 
         while (true) {
-         try {
+            try {
                 broadcastMessage("Location:" + getX() + ":" + getY());
             } catch (IOException e) {
                 e.printStackTrace();
@@ -48,7 +45,7 @@ public class TeamSharkbot extends TeamRobot {
 
             nearTeammateCheck();
             nearWallCheck();
-            
+
             if (getRadarTurnRemaining() == 0.0) {
                 setTurnRadarRight(360);
             }
@@ -63,57 +60,51 @@ public class TeamSharkbot extends TeamRobot {
      */
 
     /**
-     * @author Yao Lee
+     * Checks if other teammates are nearby and reverses if so.
+     * @author Mike
      */
-    public void reverseDirection() {
-        if (movingForward) {
-            setBack(10000);
-            movingForward = false;
-        } else {
-            setAhead(10000);
-            movingForward = true;
-        }
-    }
-    
-   
-    
-    public void nearTeammateCheck() {
-        if ((getX() - locationX > distance || getX() - locationX < -distance || getY() - locationY > distance || getY() - locationY < -distance) && inTeammate == false) {
+    private void nearTeammateCheck() {
+        if ((getX() - locationX > distance || getX() - locationX < -distance || getY() - locationY > distance || getY() - locationY < -distance) && !inTeammate) {
             inTeammate = true;
         }
-        if (getX() - locationX < distance && getX() - locationX > -distance && getY() - locationY < distance && getY() - locationY > -distance && inTeammate == true) {
-         
+        if (getX() - locationX < distance && getX() - locationX > -distance && getY() - locationY < distance && getY() - locationY > -distance && inTeammate) {
+
             inTeammate = false;
-            reverseDirection();
+            movement.reverseSharkDirection();
         }
     }
-   
-    public void nearWallCheck() {
-        if (getX() > 50 && getY() > 50 && getBattleFieldWidth() - getX() > 50 && getBattleFieldHeight() - getY() > 50 && inWall == true) {
+
+    /**
+     * Checks if walls are nearby and reverses if so
+     * @author Mike
+     */
+    private void nearWallCheck() {
+        if (getX() > 50 && getY() > 50 && getBattleFieldWidth() - getX() > 50 && getBattleFieldHeight() - getY() > 50 && !inWall) {
             inWall = false;
         }
         if (getX() <= 50 || getY() <= 50 || getBattleFieldWidth() - getX() <= 50 || getBattleFieldHeight() - getY() <= 50) {
-            if (inWall == false) {
-                reverseDirection();
+            if (!inWall) {
+                movement.reverseSharkDirection();
                 inWall = true;
             }
         }
     }
 
     /**
+     * Lets the robot shoot at a target.
      * @author Yao Lee, William
+     * @param event ScannedRobotEvent event.
      */
-    public void firingMechanicShark(ScannedRobotEvent e) {
-        double absoluteBearing = getHeading() + e.getBearing();
+    private void firingMechanicShark(ScannedRobotEvent event) {
+        double absoluteBearing = getHeading() + event.getBearing();
         double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
         double bearingFromRadar = normalRelativeAngleDegrees(absoluteBearing - getRadarHeading());
 
-        if (movingForward) {
-            setTurnRight(normalRelativeAngleDegrees(e.getBearing() + 80));
+        if (movement.sharkBotIsMovingForward()) {
+            setTurnRight(normalRelativeAngleDegrees(event.getBearing() + 80));
         } else {
-            setTurnRight(normalRelativeAngleDegrees(e.getBearing() + 100));
+            setTurnRight(normalRelativeAngleDegrees(event.getBearing() + 100));
         }
-
         if (Math.abs(bearingFromGun) <= 3) {
             setTurnGunRight(bearingFromGun);
             setTurnRadarRight(bearingFromRadar); // Keep the radar focused on the enemy
@@ -121,7 +112,7 @@ public class TeamSharkbot extends TeamRobot {
             if (getGunHeat() == 0 && getEnergy() > .2) {
                 // Never fires a bullet with a power bigger than 3
                 // Fires a bullet with at least a power of 2
-                setFire(Math.min((400 / e.getDistance()) + 2, 3));
+                setFire(Math.min((400 / event.getDistance()) + 2, 3));
             }
         } else {
             setTurnGunRight(bearingFromGun);
@@ -140,64 +131,50 @@ public class TeamSharkbot extends TeamRobot {
      */
 
     /**
+     * Handles the targeting system with messaging.
      * @author Mike, Olivier, William
+     * @param event MessageEvent event.
      */
     @Override
-    public void onMessageReceived(MessageEvent messageEvent) {
-     if (e.getMessage() instanceof String) {
-            String message = (String) e.getMessage();
+    public void onMessageReceived(MessageEvent event) {
+        if (event.getMessage() instanceof String) {
+            String message = (String) event.getMessage();
             if (message.contains("Location:")) {
                 String info = message.substring(9);
-                System.out.println(info);
                 locationX = Double.parseDouble(info.substring(0, info.indexOf(":")));
                 locationY = Double.parseDouble(info.substring(info.indexOf(":") + 1, info.length()));
-                out.println(locationX + ":" + locationY);
             }
-
         }
-        
     }
 
     /**
+     * Reverses direction if the robot hits a wall.
      * @author Yao Lee
+     * @param event HitWallEvent event.
      */
-    public void onHitWall(HitWallEvent e) {
-        reverseDirection();
+    public void onHitWall(HitWallEvent event) {
+        movement.reverseSharkDirection();
     }
 
     /**
+     * Starts shooting if the scanned robot isn't a teammate.
      * @author Mike, Olivier, William
+     * @param event ScannedRobotEvent event.
      */
-    public void onScannedRobot(ScannedRobotEvent e) {
-        if (!isTeammate(e.getName())) {
-            if (!targetAssigned) {
-                try {
-                    broadcastMessage("TARGET:" + e.getName());
-                    currentTarget = e.getName();
-                    targetAssigned = true;
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                }
-            }
-
-            if (targetAssigned) {
-                if (e.getName().equals(currentTarget)) {
-                    firingMechanicShark(e);
-                } else {
-                    scan();
-                }
-            } else {
-                firingMechanicShark(e);
-            }
+    public void onScannedRobot(ScannedRobotEvent event) {
+        if (!isTeammate(event.getName())) {
+            firingMechanicShark(event);
         }
     }
 
     /**
+     * Reverses direction if it's the fault of the robot.
      * @author Yao Lee
+     * @param event HitRobotEvent event.
      */
-    public void onHitRobot(HitRobotEvent e) {
-        if (e.isMyFault()) {
-            reverseDirection();
+    public void onHitRobot(HitRobotEvent event) {
+        if (event.isMyFault()) {
+            movement.reverseSharkDirection();
         }
     }
 }
