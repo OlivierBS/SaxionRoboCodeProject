@@ -20,15 +20,35 @@ public class TeamSharkbot extends TeamRobot {
     private String currentTarget = null;
     private boolean movingForward;
     private boolean targetAssigned = false;
+    boolean inWall;
+    boolean inTeammate = true;
+    double locationX = 0;
+    double locationY = 0;
+    int distance = 100;
+    
 
     public void run() {
         utilities = new Utilities(this);
+         if (getX() <= 50 || getY() <= 50 || getBattleFieldWidth() - getX() <= 50 || getBattleFieldHeight() - getY() <= 50) {
+            inWall = true;
+        } else {
+            inWall = false;
+        }
         setAhead(10000);
         setTurnRadarRight(360); // Scan until you find your first enemy
         movingForward = true;
         utilities.setDefenderColor(BODY_COLOR, GUN_COLOR, RADAR_COLOR, BULLET_COLOR, SCAN_COLOR);
 
         while (true) {
+         try {
+                broadcastMessage("Location:" + getX() + ":" + getY());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            nearTeammateCheck();
+            nearWallCheck();
+            
             if (getRadarTurnRemaining() == 0.0) {
                 setTurnRadarRight(360);
             }
@@ -52,6 +72,31 @@ public class TeamSharkbot extends TeamRobot {
         } else {
             setAhead(10000);
             movingForward = true;
+        }
+    }
+    
+   
+    
+    public void nearTeammateCheck() {
+        if ((getX() - locationX > distance || getX() - locationX < -distance || getY() - locationY > distance || getY() - locationY < -distance) && inTeammate == false) {
+            inTeammate = true;
+        }
+        if (getX() - locationX < distance && getX() - locationX > -distance && getY() - locationY < distance && getY() - locationY > -distance && inTeammate == true) {
+         
+            inTeammate = false;
+            reverseDirection();
+        }
+    }
+   
+    public void nearWallCheck() {
+        if (getX() > 50 && getY() > 50 && getBattleFieldWidth() - getX() > 50 && getBattleFieldHeight() - getY() > 50 && inWall == true) {
+            inWall = false;
+        }
+        if (getX() <= 50 || getY() <= 50 || getBattleFieldWidth() - getX() <= 50 || getBattleFieldHeight() - getY() <= 50) {
+            if (inWall == false) {
+                reverseDirection();
+                inWall = true;
+            }
         }
     }
 
@@ -99,14 +144,18 @@ public class TeamSharkbot extends TeamRobot {
      */
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        if (messageEvent.getMessage() instanceof String) {
-            String message = messageEvent.getMessage().toString();
-            if (message.contains("TARGET:")) {
-                targetAssigned = true;
-                currentTarget = message.substring(6);
+     if (e.getMessage() instanceof String) {
+            String message = (String) e.getMessage();
+            if (message.contains("Location:")) {
+                String info = message.substring(9);
+                System.out.println(info);
+                locationX = Double.parseDouble(info.substring(0, info.indexOf(":")));
+                locationY = Double.parseDouble(info.substring(info.indexOf(":") + 1, info.length()));
+                out.println(locationX + ":" + locationY);
             }
 
         }
+        
     }
 
     /**
