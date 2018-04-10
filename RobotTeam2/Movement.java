@@ -1,70 +1,67 @@
-package nl.saxion.Sprint2Team;
+package nl.saxion;
 
 import robocode.TeamRobot;
 
 public class Movement {
-
-    private double startingXPos1;
-    private double startingYPos1;
-    private double startingXPos2;
-    private double startingYPos2;
-
     private TeamRobot robot;
-    private Utilities utilities;
 
-    private double battleFieldHeight;
-    private double battleFieldWidth;
-
+    private double strafeBotStartingXPos1, strafeBotStartingYPos1, strafeBotStartingXPos2, strafeBotStartingYPos2;
+    private double battleFieldHeight, battleFieldWidth;
     private int strafingCount = 0;
-
+    private int moveDirection = 1;
     private int id;
-    private int moveDirection = 1; // 1 = forward, -1 = backwards
 
-    public Movement(TeamRobot robot, Utilities utilities){
+    /**
+     * Basic constructor which instantiates variables.
+     * @param robot gives us a TeamRobot reference to the robot.
+     */
+    public Movement(TeamRobot robot){
         this.robot = robot;
-        this.utilities = utilities;
-        id = utilities.getID();
+
+        id = Utilities.getID(robot);
 
         battleFieldHeight = robot.getBattleFieldHeight();
         battleFieldWidth = robot.getBattleFieldWidth();
-        startingXPos1 = battleFieldWidth * 0.25;
-        startingYPos1 = battleFieldHeight * 0.40;
-        startingXPos2 = battleFieldWidth * 0.75;
-        startingYPos2 = battleFieldHeight * 0.60;
+        strafeBotStartingXPos1 = battleFieldWidth * 0.25;
+        strafeBotStartingYPos1 = battleFieldHeight * 0.40;
+        strafeBotStartingXPos2 = battleFieldWidth * 0.75;
+        strafeBotStartingYPos2 = battleFieldHeight * 0.60;
     }
 
     /**
+     * Lets the Strafingbot to the starting position.
      * @author Olivier
      */
-    public void goToPos() {
+    public void strafeBotGoToPos() {
         if(id == 1){
-            goToPoint(startingXPos1,startingYPos1);
+            goToPoint(strafeBotStartingXPos1,strafeBotStartingYPos1);
             turnToDegree(0);
         }else if(id == 2){
-            goToPoint(startingXPos2,startingYPos2);
+            goToPoint(strafeBotStartingXPos2,strafeBotStartingYPos2);
             turnToDegree(180);
         }
-
     }
 
+
     /**
+     * Lets the robot do it's strafing.
      * @author Yaolee
      */
     public void strafeBotStrafing() {
-        // strafe by changing direction every 25 ticks
-        if (robot.getTime() % 22 == 0) {
+//         strafe by changing direction every 25 ticks
+        if (robot.getTime() % 60 == 0) {
             if(strafingCount == 4){
                 robot.turnRight(45);
                 strafingCount = 0;
-                robot.ahead(20);
+                robot.ahead(40);
             }
             strafingCount++;
             robot.setMaxVelocity(3);
             moveDirection *= -1;
             robot.setAhead(200 * moveDirection);
+
         }
     }
-
 
     /*
                                +--------------------------------+
@@ -73,6 +70,7 @@ public class Movement {
      */
 
     /**
+     * Reverses the direction the robot is facing.
      * @author Yaolee
      */
     public void reverseDirection() {
@@ -84,35 +82,39 @@ public class Movement {
     }
 
     /**
+     * Lets the robot go to a certain point.
      * @author Olivier
+     * @param x the x value of the point.
+     * @param y the y value of the point.
      */
     private void goToPoint(double x, double y){
-        double angle = utilities.getAngle(x,y);
+        double angle = Utilities.getAngle(robot, x,y);
         turnToDegree(angle);
 
         while(Math.ceil(robot.getX()) != x ){
-            double distance = utilities.getDistanceToPoint(x,y);
+            double distance = Utilities.getDistanceToPoint(robot, x,y);
             robot.setAhead(distance);
             robot.execute();
         }
     }
 
     /**
+     * Turns the robot to a certain degree.
      * @author Olivier
+     * @param degree the degree to be turned to.
      */
     private void turnToDegree(double degree){
-        if (robot.getHeading() < 180 && robot.getHeading() >= 0) {
-            robot.setTurnRight((degree - robot.getHeading()));
-            while(robot.getTurnRemaining() > 0){
-                robot.execute();
+            if (robot.getHeading() < 180 && robot.getHeading() >= 0) {
+                robot.setTurnRight((degree - robot.getHeading()));
+                while(robot.getTurnRemaining() > 0){
+                    robot.execute();
+                }
+            } else if (robot.getHeading() >= 180 && robot.getHeading() <= 360) {
+                robot.setTurnLeft((-degree + robot.getHeading()));
+                while(robot.getTurnRemaining() > 0){
+                    robot.execute();
+                }
             }
-        } else if (robot.getHeading() >= 180 && robot.getHeading() <= 360) {
-            robot.setTurnLeft((-degree + robot.getHeading()));
-            while(robot.getTurnRemaining() > 0){
-                robot.execute();
-            }
-        }
-        robot.waitFor(utilities.hasDegree(degree));
+        robot.waitFor(Utilities.hasDegree(robot,degree));
     }
-
 }
